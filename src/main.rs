@@ -96,8 +96,9 @@ async fn main() {
         }
 
         *pallet.vel.x_mut() = input_to_pallet_vel() * 25.0;
-
-        ball.shape.draw();
+        
+        // ball.shape.draw();
+        ball.shape.draw_as_circle_y();
         pallet.shape.draw();
         bricks.iter().for_each(|x| x.draw());
         next_frame().await;
@@ -151,6 +152,11 @@ impl Shape {
         let Shape { pos, size, color } = self;
         let (x, y) = (pos.x() - size.x() / 2.0, pos.y() - size.y() / 2.0);
         draw_rectangle(x, y, size.x(), size.y(), *color);
+    }
+
+    fn draw_as_circle_y(&self) {
+        let Shape { pos, size, color } = self;
+        draw_circle(pos.x(), pos.y(), size.y()/2.0, *color);
     }
 }
 
