@@ -9,14 +9,7 @@ const HZ: f64 = 60.0;
 #[macroquad::main("test")]
 async fn main() {
     let mut fixedstep = Some(fixedstep::FixedStep::start(HZ));
-    let mut ball = Moving {
-        shape: Shape {
-            pos: vec2(AREA_WIDTH * 0.5, AREA_HEIGHT * 0.5),
-            size: vec2(1.0, 1.0),
-            color: WHITE,
-        },
-        vel: vec2(0.0, -20.0),
-    };
+    let mut ball = create_ball();
     let mut pallet = Moving {
         shape: Shape {
             pos: vec2(AREA_WIDTH * 0.5, AREA_HEIGHT * 0.1),
@@ -49,6 +42,7 @@ async fn main() {
 
                 if ball.shape.pos.y() < ball.shape.size.y() {
                     fixedstep = None;
+                    ball = create_ball();
                     break;
                 };
 
@@ -87,7 +81,17 @@ async fn main() {
                     *ball.vel.y_mut() = -ball.vel.y()
                 };
 
-                }
+                /* if bricks.len() == 0 {bricks = create_bricks(
+                    vec2(0.0, AREA_HEIGHT - BRICK_HEIGHT - 5.0),
+                    vec2(1.0, 1.0),
+                    vec2(AREA_WIDTH, BRICK_HEIGHT),
+                    10,
+                    3,
+                );} */
+            }
+        } else {
+            if is_key_down(KeyCode::Space) {
+                fixedstep = Some(fixedstep::FixedStep::start(HZ));
             }
         }
 
@@ -191,10 +195,10 @@ fn create_camera() -> Camera2D {
 fn input_to_pallet_vel() -> f32 {
     use KeyCode::*;
     let mut num = 0.0;
-    if short_inp(&[Left]) {
+    if short_inp(&[Left, A]) {
         num -= 1.0
     }
-    if short_inp(&[Right]) {
+    if short_inp(&[Right, D]) {
         num += 1.0
     }
     return num;
@@ -213,6 +217,17 @@ fn tighten_range(range: std::ops::Range<f32>, num: f32) -> std::ops::Range<f32> 
     range.start + num..range.end - num
 }
 
+fn create_ball() -> Moving {
+    Moving {
+        shape: Shape {
+            pos: vec2(AREA_WIDTH * 0.5, AREA_HEIGHT * 0.5),
+            size: vec2(1.0, 1.0),
+            color: WHITE,
+        },
+        vel: vec2(0.0, -20.0),
+    }
+}
+
 fn create_bricks(start: Vec2, spacing: Vec2, size: Vec2, amount: u8, rows: u8) -> Vec<Shape> {
     // let mut col = [WHITE, RED, BLUE, GREEN, GOLD, ORANGE, YELLOW].iter().cycle();
     let mut vec = Vec::new();
@@ -221,7 +236,6 @@ fn create_bricks(start: Vec2, spacing: Vec2, size: Vec2, amount: u8, rows: u8) -
 
     let amvec = vec2(amount.into(), rows.into());
     let brick_size = size / amvec;
-    let x = size / (amvec + vec2(1.0, 1.0));
     for row in 0..rows {
         for brick in 0..amount {
             let shift = vec2(brick.into(), row.into());
